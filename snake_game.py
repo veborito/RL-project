@@ -138,7 +138,9 @@ class SnakeGame:
             self.direction = directions[(current_idx - 1) % 4]
 
     def _get_observation(self):
-        """Get current state observation for RL"""
+        """Get current state observation for RL
+            Flat observation space for Q-learning and PPO
+        """
         if not self.snake:
             return np.zeros(11, dtype=np.float32)
 
