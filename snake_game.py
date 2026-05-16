@@ -181,7 +181,7 @@ class SnakeGame:
                 food_left,
                 food_right,
             ],
-            dtype=np.float32,
+            dtype=np.intp,
         )
 
         return observation
