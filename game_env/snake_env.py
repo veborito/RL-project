@@ -2,7 +2,7 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 import pygame
-from snake_game import SnakeGame
+from game_env.snake_game import SnakeGame
 
 class SnakeEnv(gym.Env):
     """Gymnasium environment wrapper for Snake game"""
@@ -46,9 +46,33 @@ class SnakeEnv(gym.Env):
             self.render()
 
         return observation, info
+    
+    def reset_bin(self, seed=None, options=None):
+        """
+        Reset the environment but converts observations
+        into a single value from binary observation array
+        """
+        super().reset(seed=seed)
+
+        if seed is not None:
+            np.random.seed(seed)
+
+        observation = self.game.reset()
+        bin = np.array2string(observation).strip("[]").replace(" ", "")
+        observation = int(bin, 2)
+        info = {"score": self.game.score}
+
+        if self.render_mode == "human":
+            self.render()
+
+        return observation, info
 
     def step_bin(self, action):
-        """Execute one step in the environment"""
+        """
+        Execute one step in the environmentbut converts observations
+        into a single value from binary observation array
+        """
+            
         observation, reward, terminated, truncated, info = self.game.take_action(action)
 
         bin = np.array2string(observation).strip("[]").replace(" ", "")
