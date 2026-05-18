@@ -72,7 +72,7 @@ def run(episodes):
 
   # Load learned policy
   policy_network = QNetwork(input_shape=3, out_actions=4).to(device)
-  policy_network.load_state_dict(torch.load("snake_dql_cnn.pt"))
+  policy_network.load_state_dict(torch.load("dqn_cnn_model.pt"))
   policy_network.eval()    # switch model to evaluation mode
 
   for _ in range(episodes):

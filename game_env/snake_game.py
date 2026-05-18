@@ -192,10 +192,11 @@ class SnakeGame:
           )
         
         if self.obs == "game":
+          head_marks = {Direction.UP: 5, Direction.RIGHT: 6, Direction.DOWN: 7, Direction.LEFT: 8} # to know in which direction the snake is going
           observation = np.zeros([self.width, self.height])
           #draw snake
           for i, (x, y) in enumerate(self.snake):
-            mark = 5 if i == 0 else 1
+            mark = head_marks[self.direction] if i == 0 else 1 
             observation[x, y] = mark
           # Draw food
           observation[self.food[0], self.food[1]] = 2
