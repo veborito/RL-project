@@ -20,7 +20,7 @@ class QNetwork(nn.Module):
 
 
 def run(episodes):
-        env = SnakeEnv(render_mode='human')
+        env = SnakeEnv(render_mode='human', width=8, height=8)
 
         # Load learned policy
         policy_network = QNetwork(n_states=11, n_actions=4, hidden_dim=128).to(device)
