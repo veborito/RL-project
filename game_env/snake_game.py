@@ -59,7 +59,6 @@ class SnakeGame:
         For RL: action = Direction enum
         For manual: action = None (uses self.direction directly)
         """
-        prev_dist = abs(head_x - self.food[0]) + abs(head_y - self.food[1])
         
         if self.game_over:
             return self._get_observation(), 0, True, False, {}
@@ -70,7 +69,8 @@ class SnakeGame:
 
         # Move snake
         head_x, head_y = self.snake[0]
-
+        prev_dist = abs(head_x - self.food[0]) + abs(head_y - self.food[1])
+        
         # Calculate new head position
         if self.direction == Direction.UP:
             new_head = (head_x, head_y - 1)
@@ -127,7 +127,7 @@ class SnakeGame:
         else:
             self.snake.pop()  # Remove tail if no food eaten
             if self.living_cost:
-              reward = 0.1 if new_dist < prev_dist else -0.15
+              reward = 0.1 if new_dist < prev_dist else -0.15 # claude idea
         return self._get_observation(), reward, terminated, False, {"score": self.score}
 
     def _update_direction(self, action):
