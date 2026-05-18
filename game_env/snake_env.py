@@ -9,7 +9,7 @@ class SnakeEnv(gym.Env):
 
     metadata = {"render_modes": ["human"], "render_fps": 30}
 
-    def __init__(self, render_mode=None, width=20, height=15):
+    def __init__(self, obs="flat", living_cost=False, render_mode=None, width=20, height=15):
         super().__init__()
 
         self.width = width
@@ -17,7 +17,7 @@ class SnakeEnv(gym.Env):
         self.render_mode = render_mode
 
         # Initialize the game
-        self.game = SnakeGame(width=width, height=height)
+        self.game = SnakeGame(obs=obs, living_cost=living_cost, width=width, height=height)
 
         # Define action and observation space
         # Actions: 4 directions (up, right, down, left)
@@ -88,11 +88,11 @@ class SnakeEnv(gym.Env):
         observation, reward, terminated, truncated, info = self.game.take_action(action)
 
         if self.render_mode == "human":
-            self.render()
-
+          self.render()
+                  
         return observation, reward, terminated, truncated, info
 
-    def render(self):
+    def render(self, mode="human"):
         """Render the environment"""
         if self.render_mode == "human":
             # Handle pygame events to prevent window from becoming unresponsive
@@ -100,8 +100,19 @@ class SnakeEnv(gym.Env):
                 if event.type == pygame.QUIT:
                     self.close()
                     return
-
             self.game.render(mode="human")
+        
+        if self.render_mode == "array":
+          return self.game.array_render()
+        
+        if self.render_mode == "image":
+            # Handle pygame events to prevent window from becoming unresponsive
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.close()
+                    return
+
+            return self.game.render(mode="image")
 
     def close(self):
         """Close the environment"""
