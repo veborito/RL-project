@@ -11,7 +11,7 @@ def run(episodes=1000, episode_len=10_000,is_training=True, render=False, model=
   reward_path = Path('./q_learning') / (model + '.png')
   error_path = Path('./q_learning') / (model + '_error.png')
   
-  env = SnakeEnv(render_mode='human' if render else None)
+  env = SnakeEnv(render_mode='human' if render else None, width=8, height=8)
   
   if(is_training):
        q = np.zeros([int(np.pow(2, env.observation_space.shape[0])), env.action_space.n]) # init a 2^11 (each obs is a boolean and there is 11 obs) x 4 array
@@ -82,4 +82,4 @@ if __name__ == '__main__':
   N_EPISODES = 1_000
   EPISODE_LEN = 10_000
   # run(episodes=N_EPISODES, episode_len=EPISODE_LEN, model='q_learning_model_1k')
-  run(5, 1000,False, True, 'q_learning_model_1k')
+  run(5, 1000,False, True, 'q_learning_model_100k')
