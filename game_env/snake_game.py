@@ -12,7 +12,7 @@ class Direction(Enum):
 
 
 class SnakeGame:
-    def __init__(self, width=20, height=15, cell_size=20):
+    def __init__(self, obs="flat", living_cost=False, width=20, height=15, cell_size=20):
         self.width = width
         self.height = height
         self.cell_size = cell_size
@@ -28,7 +28,10 @@ class SnakeGame:
         self.screen = None
         self.clock = None
         self.font = None
-
+        
+        self.obs = obs
+        self.living_cost = living_cost
+        
         self.reset()
 
     def reset(self):
@@ -56,6 +59,8 @@ class SnakeGame:
         For RL: action = Direction enum
         For manual: action = None (uses self.direction directly)
         """
+        prev_dist = abs(head_x - self.food[0]) + abs(head_y - self.food[1])
+        
         if self.game_over:
             return self._get_observation(), 0, True, False, {}
 
@@ -75,11 +80,11 @@ class SnakeGame:
             new_head = (head_x - 1, head_y)
         elif self.direction == Direction.RIGHT:
             new_head = (head_x + 1, head_y)
-
+        
+        new_dist = abs(new_head[0] - self.food[0]) + abs(new_head[1] - self.food[1])
         # Check collisions
-        reward = 0
+        reward = -0.1  if self.living_cost else 0
         terminated = False
-
         # Wall collision
         if (
             new_head[0] < 0
@@ -121,7 +126,8 @@ class SnakeGame:
             self.food = self._generate_food()
         else:
             self.snake.pop()  # Remove tail if no food eaten
-
+            if self.living_cost:
+              reward = 0.1 if new_dist < prev_dist else -0.15
         return self._get_observation(), reward, terminated, False, {"score": self.score}
 
     def _update_direction(self, action):
@@ -141,49 +147,58 @@ class SnakeGame:
         """Get current state observation for RL
             Flat observation space for Q-learning and PPO
         """
-        if not self.snake:
-            return np.zeros(11, dtype=np.float32)
+        if self.obs == "flat":
+          if not self.snake:
+              return np.zeros(11, dtype=np.float32)
 
-        head = self.snake[0]
+          head = self.snake[0]
 
-        # Get danger in each direction relative to current direction
-        directions = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
-        current_dir_idx = directions.index(self.direction)
+          # Get danger in each direction relative to current direction
+          directions = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+          current_dir_idx = directions.index(self.direction)
 
-        # Check danger: straight, right, left
-        danger_straight = self._is_collision(head, self.direction)
-        danger_right = self._is_collision(head, directions[(current_dir_idx + 1) % 4])
-        danger_left = self._is_collision(head, directions[(current_dir_idx - 1) % 4])
+          # Check danger: straight, right, left
+          danger_straight = self._is_collision(head, self.direction)
+          danger_right = self._is_collision(head, directions[(current_dir_idx + 1) % 4])
+          danger_left = self._is_collision(head, directions[(current_dir_idx - 1) % 4])
 
-        # Direction booleans
-        dir_up = self.direction == Direction.UP
-        dir_right = self.direction == Direction.RIGHT
-        dir_down = self.direction == Direction.DOWN
-        dir_left = self.direction == Direction.LEFT
+          # Direction booleans
+          dir_up = self.direction == Direction.UP
+          dir_right = self.direction == Direction.RIGHT
+          dir_down = self.direction == Direction.DOWN
+          dir_left = self.direction == Direction.LEFT
 
-        # Food location relative to head
-        food_up = self.food[1] < head[1]
-        food_down = self.food[1] > head[1]
-        food_left = self.food[0] < head[0]
-        food_right = self.food[0] > head[0]
+          # Food location relative to head
+          food_up = self.food[1] < head[1]
+          food_down = self.food[1] > head[1]
+          food_left = self.food[0] < head[0]
+          food_right = self.food[0] > head[0]
 
-        observation = np.array(
-            [
-                danger_straight,
-                danger_right,
-                danger_left,
-                dir_up,
-                dir_right,
-                dir_down,
-                dir_left,
-                food_up,
-                food_down,
-                food_left,
-                food_right,
-            ],
-            dtype=np.intp,
-        )
-
+          observation = np.array(
+              [
+                  danger_straight,
+                  danger_right,
+                  danger_left,
+                  dir_up,
+                  dir_right,
+                  dir_down,
+                  dir_left,
+                  food_up,
+                  food_down,
+                  food_left,
+                  food_right,
+              ],
+              dtype=np.intp,
+          )
+        
+        if self.obs == "game":
+          observation = np.zeros([self.width, self.height])
+          #draw snake
+          for i, (x, y) in enumerate(self.snake):
+            mark = 5 if i == 0 else 1
+            observation[x, y] = mark
+          # Draw food
+          observation[self.food[0], self.food[1]] = 2
         return observation
 
     def _is_collision(self, position, direction):
@@ -215,6 +230,7 @@ class SnakeGame:
 
         return False
 
+  
     def render(self, mode="human"):
         """Render the game"""
         if mode == "human":
