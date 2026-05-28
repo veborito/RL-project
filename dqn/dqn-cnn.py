@@ -30,7 +30,7 @@ class QNetwork(nn.Module):
         self.layer_stack = nn.Sequential(
             nn.Flatten(), # flatten inputs into a single vector
             # After flattening the matrix into a vector, pass it to the output layer. To determine the input shape, use the print() statement in forward()
-            nn.Linear(in_features=10*4*1, out_features=out_actions)
+            nn.Linear(in_features=10*2*2, out_features=out_actions)
         )
         
   def forward(self, x):
@@ -39,7 +39,6 @@ class QNetwork(nn.Module):
         #print(x.shape)  # Use this to determine input shape of the output layer.
         x = self.layer_stack(x)
         return x
-
 
 COLOR_PALETTE = torch.tensor([
     [0.1, 0.1, 0.1],  # 0: Empty
@@ -72,7 +71,7 @@ def run(episodes):
 
   # Load learned policy
   policy_network = QNetwork(input_shape=3, out_actions=4).to(device)
-  policy_network.load_state_dict(torch.load("dqn_cnn_model.pt"))
+  policy_network.load_state_dict(torch.load("snake_dql_cnn.pt"))
   policy_network.eval()    # switch model to evaluation mode
 
   for _ in range(episodes):
