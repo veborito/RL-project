@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 from game_env.snake_env import SnakeEnv
 
-
+torch.manual_seed(123)
 device = torch.device(torch.accelerator.current_accelerator() if torch.accelerator.is_available() else 'cpu')
+np.random.seed(123)
 
 class QNetwork(nn.Module):
     def __init__(self, n_states, n_actions, hidden_dim):
@@ -24,12 +26,12 @@ def run(episodes):
 
         # Load learned policy
         policy_network = QNetwork(n_states=11, n_actions=4, hidden_dim=128).to(device)
-        policy_network.load_state_dict(torch.load("snake_dql.pt"))
+        policy_network.load_state_dict(torch.load("snake_dql_sparse.pt"))
         policy_network.eval()    # switch model to evaluation mode
 
         for _ in range(episodes):
             state = env.reset()[0]  
-            for _ in range(10_000):  
+            for _ in range(1000):  
                 # Select best action   
                 with torch.no_grad():
                   action_q_values = policy_network(torch.tensor(state, dtype=torch.float32).to(device))
@@ -44,4 +46,4 @@ def run(episodes):
 
 
 if __name__=='__main__':
-  run(1)
+  run(5)

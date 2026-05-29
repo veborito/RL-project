@@ -11,7 +11,7 @@ class Direction(Enum):
     LEFT = 3
 
 
-class SnakeGame:
+class SnakeGameObstacles:
     def __init__(self, obs="flat", living_cost=False, width=20, height=15, cell_size=20, num_obstacles=4):
         self.width = width
         self.height = height

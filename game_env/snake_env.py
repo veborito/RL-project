@@ -3,13 +3,14 @@ from gymnasium import spaces
 import numpy as np
 import pygame
 from game_env.snake_game import SnakeGame
+from game_env.snake_w_obstacles import SnakeGameObstacles
 
 class SnakeEnv(gym.Env):
     """Gymnasium environment wrapper for Snake game"""
 
     metadata = {"render_modes": ["human"], "render_fps": 30}
 
-    def __init__(self, obs="flat", living_cost=False, render_mode=None, width=20, height=15):
+    def __init__(self, obs="flat", living_cost=False, render_mode=None, obstacle=False,width=20, height=15):
         super().__init__()
 
         self.width = width
@@ -18,6 +19,12 @@ class SnakeEnv(gym.Env):
 
         # Initialize the game
         self.game = SnakeGame(obs=obs, living_cost=living_cost, width=width, height=height)
+        if not obstacle:
+          self.game = SnakeGame(obs=obs, living_cost=living_cost, width=width, height=height)
+          print("Game without obstacles")
+        else:
+          self.game = SnakeGameObstacles(obs=obs, living_cost=living_cost, width=width, height=height)
+          print("Game with obstacles")
 
         # Define action and observation space
         # Actions: 4 directions (up, right, down, left)

@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 from game_env.snake_env import SnakeEnv
 
-
+torch.manual_seed(123)
 device = torch.device(torch.accelerator.current_accelerator() if torch.accelerator.is_available() else 'cpu')
+np.random.seed(123)
 
 class QNetwork(nn.Module):
   def __init__(self, input_shape, out_actions):
@@ -76,7 +78,7 @@ def run(episodes):
 
   for _ in range(episodes):
       state = env.reset()[0]  
-      for _ in range(10_000):  
+      for _ in range(500):  
           # Select best action   
           with torch.no_grad():
             action_q_values = policy_network(state_to_dqn_input(state).to(device))
@@ -91,4 +93,4 @@ def run(episodes):
 
 
 if __name__=='__main__':
-  run(1)
+  run(5)

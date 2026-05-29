@@ -142,7 +142,7 @@ class SnakeGame:
             self.direction = directions[(current_idx + 1) % 4]
         elif action == 2:  # Turn left
             self.direction = directions[(current_idx - 1) % 4]
-
+        
     def _get_observation(self):
         """Get current state observation for RL
             Flat observation space for Q-learning and PPO
@@ -193,13 +193,19 @@ class SnakeGame:
         
         if self.obs == "game":
           head_marks = {Direction.UP: 5, Direction.RIGHT: 6, Direction.DOWN: 7, Direction.LEFT: 8} # to know in which direction the snake is going
-          observation = np.zeros([self.width, self.height])
+          observation = np.zeros([self.height, self.width])
           #draw snake
           for i, (x, y) in enumerate(self.snake):
             mark = head_marks[self.direction] if i == 0 else 1 
-            observation[x, y] = mark
-          # Draw food
-          observation[self.food[0], self.food[1]] = 2
+            observation[y, x] = mark
+          #draw food
+          observation[self.food[1], self.food[0]] = 2
+          #draw walls
+          # observation[0] = 3
+          # observation[-1] = 3
+          # observation[:,0] = 3
+          # observation[:,-1] = 3
+
         return observation
 
     def _is_collision(self, position, direction):
@@ -367,10 +373,11 @@ class SnakeGame:
                             paused = False
                         elif event.key == pygame.K_ESCAPE:
                             running = False
-
             # Update game (if not paused and not game over)
             if not paused and not self.game_over:
                 self.take_action()  # No action parameter = manual mode
+                print("---------------------------")
+                print(self._get_observation())
 
             # Render
             self.render()
@@ -394,14 +401,14 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Play Snake manually")
-    parser.add_argument("--width", type=int, default=20, help="Game width")
-    parser.add_argument("--height", type=int, default=15, help="Game height")
-    parser.add_argument("--speed", type=int, default=8, help="Game speed (1-20)")
+    parser.add_argument("--width", type=int, default=10, help="Game width")
+    parser.add_argument("--height", type=int, default=8, help="Game height")
+    parser.add_argument("--speed", type=int, default=3, help="Game speed (1-20)")
 
     args = parser.parse_args()
     args.speed = max(1, min(20, args.speed))
 
-    game = SnakeGame(args.width, args.height)
+    game = SnakeGame(width=args.width, height=args.height, obs="game")
 
     try:
         game.play_manual(fps=args.speed)

@@ -13,6 +13,7 @@ from stable_baselines3.common.monitor import Monitor
 import sys
 import os
 
+
 # Allow running from repo root or from ppo/ subfolder
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from game_env.snake_env import SnakeEnv
@@ -45,12 +46,18 @@ class ScoreCallback(BaseCallback):
         return True
 
 
+def running_mean(x, N=50):
+    if len(x) < N:
+        return np.array(x)
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+    return (cumsum[N:] - cumsum[:-N]) / float(N)
+  
 # ── training ───────────────────────────────────────────────────────────────
 def train(
     timesteps: int = 500_000,
     grid_size: int = 8,
     living_cost: bool = False,
-    seed: int = 42,
+    seed: int = 123,
     model_name: str = "ppo_snake_model",
     verbose: int = 1,
 ):
@@ -110,11 +117,6 @@ def train(
 
 def _plot_training(rewards, scores, grid_size, timesteps):
     """Save learning-curve plots."""
-    def running_mean(x, N=50):
-        if len(x) < N:
-            return np.array(x)
-        cumsum = np.cumsum(np.insert(x, 0, 0))
-        return (cumsum[N:] - cumsum[:-N]) / float(N)
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle(f"PPO Training — {grid_size}×{grid_size} grid, {timesteps:,} steps")
@@ -144,7 +146,7 @@ def evaluate(
     grid_size:  int = 8,
     living_cost: bool = False,
     render: bool = False,
-    seed: int = 42,
+    seed: int = 123,
 ) -> dict:
     """
     Evaluate a saved PPO model.
@@ -203,19 +205,45 @@ if __name__ == "__main__":
     parser.add_argument("--timesteps",   type=int,   default=500_000)
     parser.add_argument("--grid",        type=int,   default=8)
     parser.add_argument("--living-cost", action="store_true")
-    parser.add_argument("--seed",        type=int,   default=42)
+    parser.add_argument("--seed",        type=int,   default=123)
     parser.add_argument("--episodes",    type=int,   default=100)
     parser.add_argument("--model",       type=str,   default="ppo_snake_model")
     args = parser.parse_args()
 
     if args.mode == "train":
-        train(
-            timesteps   = args.timesteps,
-            grid_size   = args.grid,
-            living_cost = args.living_cost,
-            seed        = args.seed,
-            model_name  = args.model,
-        )
+      model = "ppo_snake_model"
+      _, scores, rewards_per_episodes = train(
+          timesteps   = args.timesteps,
+          grid_size   = args.grid,
+          living_cost = False,
+          seed        = args.seed,
+          model_name  = "ppo_snake_model_sparse",
+      )
+      _, scores_dense, rewards_per_episodes_dense = train(
+          timesteps   = args.timesteps,
+          grid_size   = args.grid,
+          living_cost = True,
+          seed        = args.seed,
+          model_name  = "ppo_snake_model_dense",
+      )
+      plt.title('Cumul rewards per episode')
+      plt.xlabel('Episode')
+      plt.ylabel('Reward')
+      plt.plot(running_mean(rewards_per_episodes, 100), label="sparse")
+      plt.plot(running_mean(rewards_per_episodes_dense, 100), label="dense")
+      plt.grid()
+      plt.legend()
+      plt.savefig(Path('./ppo') / (model + '_rewards.png'))
+      plt.figure()
+      plt.title('Score per episode')
+      plt.xlabel('Episode')
+      plt.ylabel('Score')
+      plt.plot(running_mean(scores, 100), label="sparse")
+      plt.plot(running_mean(scores_dense, 100),  label="dense")
+      plt.grid()
+      plt.legend()
+      plt.savefig(Path('./ppo') / (model + '_score.png'))
+
     elif args.mode == "eval":
         evaluate(
             model_name  = args.model,
