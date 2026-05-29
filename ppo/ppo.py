@@ -1,4 +1,6 @@
 """
+mostly AI-generated, we did it with the help of Claude.
+
 PPO training for Snake using Stable-Baselines3.
 Uses the flat 11-feature observation space (same as Q-Learning and DQN-MLP)
 so all three algorithms are compared on equal footing.
