@@ -445,7 +445,7 @@ def main():
     args = parser.parse_args()
     args.speed = max(1, min(20, args.speed))
 
-    game = SnakeGame(width=args.width, height=args.height)
+    game = SnakeGameObstacles(width=args.width, height=args.height)
 
     try:
         game.play_manual(fps=args.speed)
