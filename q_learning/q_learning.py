@@ -7,7 +7,7 @@ from pathlib import Path
 
 np.random.seed(123)
 
-def run(episodes=1000, episode_len=10_000,is_training=True, living_cost=False,render=False, model='q_learning_model'):
+def run(episodes=1000, episode_len=10_000, is_training=True, living_cost=False, render=False, model='q_learning_model'):
   model_path = Path('./q_learning') / (model + '.pkl')
   
   if not living_cost:
@@ -27,7 +27,7 @@ def run(episodes=1000, episode_len=10_000,is_training=True, living_cost=False,re
   
   epsilon = 1
   decay = 1 / (episodes / 2)
-  rng = np.random.default_rng()
+  rng = np.random.default_rng(seed=123)
   
   rewards_per_episodes = np.zeros(episodes)  
   training_error = np.zeros(episodes)
@@ -84,8 +84,8 @@ if __name__ == '__main__':
   
   model = "q_learning_model_10k"
   
-  rewards_per_episodes, scores, training_error = run(episodes=N_EPISODES, episode_len=EPISODE_LEN, model=model)
-  rewards_per_episodes_dense, scores_dense, training_error_dense = run(episodes=N_EPISODES, episode_len=EPISODE_LEN, model=model, living_cost=True)
+  rewards_per_episodes, scores, training_error = run(episodes=N_EPISODES, episode_len=EPISODE_LEN, model="q_learning_model_10k_sparse")
+  rewards_per_episodes_dense, scores_dense, training_error_dense = run(episodes=N_EPISODES, episode_len=EPISODE_LEN, living_cost=True, model="q_learning_model_10k_dense")
   
   plt.title('Cumul rewards per episode')
   plt.xlabel('Episode')
@@ -114,4 +114,5 @@ if __name__ == '__main__':
   plt.legend()
   plt.savefig(Path('./q_learning') / (model + '_score.png'))
   
-  #run(5, 200,False, True, 'q_learning_model_200k')
+  #run(episodes=5, episode_len=200, False, True, 'q_learning_model_10k_sparse')
+  #run(episodes=5, episode_len=200, False, True, 'q_learning_model_10k_dense')

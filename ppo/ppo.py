@@ -33,6 +33,7 @@ class ScoreCallback(BaseCallback):
         super().__init__(verbose)
         self.episode_scores   = []
         self.episode_rewards  = []
+        self.episode_timesteps = [] 
         self._current_reward  = 0.0
 
     def _on_step(self) -> bool:
@@ -42,16 +43,19 @@ class ScoreCallback(BaseCallback):
         if self.locals["dones"][0]:
             self.episode_scores.append(info.get("score", 0))
             self.episode_rewards.append(self._current_reward)
+            self.episode_timesteps.append(self.num_timesteps) 
             self._current_reward = 0.0
         return True
 
+def x_axis(ts, N=100):
+    return np.array(ts)[N-1:]
 
 def running_mean(x, N=50):
     if len(x) < N:
         return np.array(x)
     cumsum = np.cumsum(np.insert(x, 0, 0))
     return (cumsum[N:] - cumsum[:-N]) / float(N)
-  
+
 # ── training ───────────────────────────────────────────────────────────────
 def train(
     timesteps: int = 500_000,
@@ -112,7 +116,7 @@ def train(
                    grid_size, timesteps)
 
     env.close()
-    return model, callback.episode_scores, callback.episode_rewards
+    return model, callback.episode_scores, callback.episode_rewards, callback.episode_timesteps
 
 
 def _plot_training(rewards, scores, grid_size, timesteps):
@@ -202,7 +206,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PPO Snake — train or evaluate")
     parser.add_argument("mode", choices=["train", "eval", "play"],
                         nargs="?", default="train")
-    parser.add_argument("--timesteps",   type=int,   default=500_000)
+    parser.add_argument("--timesteps",   type=int,   default=300_000)
     parser.add_argument("--grid",        type=int,   default=8)
     parser.add_argument("--living-cost", action="store_true")
     parser.add_argument("--seed",        type=int,   default=123)
@@ -212,14 +216,14 @@ if __name__ == "__main__":
 
     if args.mode == "train":
       model = "ppo_snake_model"
-      _, scores, rewards_per_episodes = train(
+      _, scores, rewards_per_episodes, timesteps = train(
           timesteps   = args.timesteps,
           grid_size   = args.grid,
           living_cost = False,
           seed        = args.seed,
           model_name  = "ppo_snake_model_sparse",
       )
-      _, scores_dense, rewards_per_episodes_dense = train(
+      _, scores_dense, rewards_per_episodes_dense, timesteps_dense = train(
           timesteps   = args.timesteps,
           grid_size   = args.grid,
           living_cost = True,
@@ -227,19 +231,19 @@ if __name__ == "__main__":
           model_name  = "ppo_snake_model_dense",
       )
       plt.title('Cumul rewards per episode')
-      plt.xlabel('Episode')
+      plt.xlabel('Timesteps')
       plt.ylabel('Reward')
-      plt.plot(running_mean(rewards_per_episodes, 100), label="sparse")
-      plt.plot(running_mean(rewards_per_episodes_dense, 100), label="dense")
+      plt.plot(x_axis(timesteps), running_mean(rewards_per_episodes, 100), label="sparse")
+      plt.plot(x_axis(timesteps_dense), running_mean(rewards_per_episodes_dense, 100), label="dense")
       plt.grid()
       plt.legend()
       plt.savefig(Path('./ppo') / (model + '_rewards.png'))
       plt.figure()
       plt.title('Score per episode')
-      plt.xlabel('Episode')
+      plt.xlabel('Timesteps')
       plt.ylabel('Score')
-      plt.plot(running_mean(scores, 100), label="sparse")
-      plt.plot(running_mean(scores_dense, 100),  label="dense")
+      plt.plot(x_axis(timesteps), running_mean(scores, 100), label="sparse")
+      plt.plot(x_axis(timesteps_dense), running_mean(scores_dense, 100), label="dense")
       plt.grid()
       plt.legend()
       plt.savefig(Path('./ppo') / (model + '_score.png'))
