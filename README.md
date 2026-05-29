@@ -1,21 +1,9 @@
-<div align="center">
+# Benchmarking Q-Learning, DQN-MLP, and PPO on the Snake Game
+### Final Project — Reinforcement Learning and Decision Making Under Uncertainty
 
-# Snake RL
+This repository contains the implementation and results of a project conducted as part of the course **Reinforcement Learning and Decision Making Under Uncertainty** by Prof. Christos Dimitrakakis, within the [Swiss Joint Master in Computer Science](https://mcs.unibnf.ch/).
 
-### Benchmarking Q-Learning, DQN-MLP, and PPO on the Snake Game
-
-*Reinforcement Learning and Decision Making Under Uncertainty — Spring 2026*  
-*University of Neuchâtel, Master in Computer Science*
-
-[![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)](https://python.org)
-[![Gymnasium](https://img.shields.io/badge/Gymnasium-1.2-orange)](https://gymnasium.farama.org)
-[![Stable Baselines3](https://img.shields.io/badge/SB3-2.8-green)](https://stable-baselines3.readthedocs.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-
-**Allizha Theiventhiram · Boris Verdecia Echarte**  
-Supervisor: Prof. Christos Dimitrakakis
-
-</div>
+The project was carried out by **Allizha Theiventhiram** and **Boris Verdecia Echarte**.
 
 ---
 
