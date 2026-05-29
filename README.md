@@ -4,8 +4,8 @@
 This repository contains the implementation and results of a project conducted as part of the course **Reinforcement Learning and Decision Making Under Uncertainty** by Prof. Christos Dimitrakakis, within the [Swiss Joint Master in Computer Science](https://mcs.unibnf.ch/).
 
 The project was carried out by :  
-**Allizha Theiventhiram** — University of Neuchâtel — allizha.theiventhiram@unine.ch  
-**Boris Verdecia Echarte** — University of Neuchâtel — boris.verdecia@unine.ch
+- **Allizha Theiventhiram** — University of Neuchâtel — allizha.theiventhiram@unine.ch  
+- **Boris Verdecia Echarte** — University of Neuchâtel — boris.verdecia@unine.ch
 
 ---
 
